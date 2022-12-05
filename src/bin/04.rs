@@ -28,64 +28,64 @@ mod tests {
     }
 }
 
-pub fn part_one(input: &str) -> Option<u32> {
-    let Ok(lines) = read_lines("src/input") else { return };
+pub fn part_one(_input: &str) -> Option<u32> {
+    let Ok(lines) = read_lines("src/input") else { return None };
     let mut overlapping_elve: u32 = 0;
     overlapping_elve += lines
         .into_iter()
         .map(|line| handle_line(line.unwrap()))
         .sum::<u32>();
-    return Some(overlapping_elve);
+    Some(overlapping_elve)
 }
 
-fn handle_line(line: String) -> u32 {
+fn handle_line(_line: String) -> u32 {
     let seperator = Regex::new(r"[,-]").unwrap();
 
-    let mut splits = seperator.split(&line);
+    let mut splits = seperator.split(&_line);
     let first_elf_first_number = parse_split_to_u32(&mut splits);
     let first_elf_sec_number = parse_split_to_u32(&mut splits);
     let sec_elf_first_number = parse_split_to_u32(&mut splits);
     let sec_elf_sec_number = parse_split_to_u32(&mut splits);
 
     match first_elf_first_number.cmp(&sec_elf_first_number) {
-        Ordering::Less => return (first_elf_sec_number >= sec_elf_sec_number) as u32,
-        Ordering::Greater => return (first_elf_sec_number <= sec_elf_sec_number) as u32,
-        Ordering::Equal => return 1, // It passed even though I should add more stuff here
+        Ordering::Less => (first_elf_sec_number >= sec_elf_sec_number) as u32,
+        Ordering::Greater => (first_elf_sec_number <= sec_elf_sec_number) as u32,
+        Ordering::Equal => 1, // It passed even though I should add more stuff here
     }
 }
 
 fn parse_split_to_u32(split: &mut regex::Split) -> u32 {
-    return (split.next().unwrap()).parse::<u32>().unwrap();
+    (split.next().unwrap()).parse::<u32>().unwrap()
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
-    let Ok(lines) = read_lines("src/input") else { return };
+pub fn part_two(_input: &str) -> Option<u32> {
+    let Ok(lines) = read_lines("src/input") else { return None };
     let mut overlapping_elve: u32 = 0;
     overlapping_elve += lines
         .into_iter()
         .map(|line| handle_line_2(line.unwrap()))
         .sum::<u32>();
-    return Some(overlapping_elve);
+    Some(overlapping_elve)
 }
 
-fn handle_line_2(line: String) -> u32 {
+fn handle_line_2(_line: String) -> u32 {
     let seperator = Regex::new(r"[,-]").unwrap();
 
-    let mut splits = seperator.split(&line);
+    let mut splits = seperator.split(&_line);
     let first_elf_first_number = parse_split_to_u32_2(&mut splits);
     let first_elf_sec_number = parse_split_to_u32_2(&mut splits);
     let sec_elf_first_number = parse_split_to_u32_2(&mut splits);
     let sec_elf_sec_number = parse_split_to_u32_2(&mut splits);
 
     match first_elf_first_number.cmp(&sec_elf_first_number) {
-        Ordering::Less => return (first_elf_sec_number >= sec_elf_first_number) as u32,
-        Ordering::Greater => return (sec_elf_sec_number >= first_elf_first_number) as u32,
-        Ordering::Equal => return 1,
+        Ordering::Less => (first_elf_sec_number >= sec_elf_first_number) as u32,
+        Ordering::Greater => (sec_elf_sec_number >= first_elf_first_number) as u32,
+        Ordering::Equal => 1,
     }
 }
 
 fn parse_split_to_u32_2(split: &mut regex::Split) -> u32 {
-    return (split.next().unwrap()).parse::<u32>().unwrap();
+    (split.next().unwrap()).parse::<u32>().unwrap()
 }
 
 // UTILS

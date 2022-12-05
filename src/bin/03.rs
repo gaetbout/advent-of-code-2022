@@ -27,18 +27,13 @@ mod tests {
     }
 }
 
-pub fn part_one(input: &str) -> Option<u32> {
+pub fn part_one(_input: &str) -> Option<u32> {
     let Ok(lines) = read_lines("src/input") else { return None };
     let mut score: u32 = 0;
-    for res_line in lines {
-        match res_line {
-            Ok(line) => {
-                score += get_score_equivalent(get_most_used_letter_for(line));
-            }
-            _ => (),
-        }
+    for line in lines.into_iter().flatten() {
+        score += get_score_equivalent(get_most_used_letter_for(line));
     }
-    return Some(score);
+    Some(score)
 }
 fn get_most_used_letter_for(line: String) -> char {
     let line_len_divided = (line.len() / 2) - 1;
@@ -53,7 +48,7 @@ fn get_most_used_letter_for(line: String) -> char {
             letters.insert(c);
         }
     }
-    return '0';
+    '0'
 }
 
 fn get_score_equivalent(c: char) -> u32 {
@@ -61,41 +56,28 @@ fn get_score_equivalent(c: char) -> u32 {
     if char_as_u32 > 96 {
         return char_as_u32 - 96;
     }
-    return char_as_u32 - 38;
+    char_as_u32 - 38
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(_input: &str) -> Option<u32> {
     let Ok(lines) = read_lines("src/input") else { return None };
     let mut score: u32 = 0;
     let mut round = 0;
     let mut letters = HashSet::new();
-    for res_line in lines {
-        match res_line {
-            Ok(line) => {
-                if round == 0 {
-                    line.chars().for_each(|c| {
-                        letters.insert(c);
-                    });
-                } else if round == 1 {
-                    letters = filter_set(line, letters);
-                } else {
-                    score += get_score_equivalent_2(find_first(line, letters));
-                    letters = HashSet::new();
-                }
-                round = (round + 1) % 3;
-            }
-            _ => (),
+    for line in lines.into_iter().flatten() {
+        if round == 0 {
+            line.chars().for_each(|c| {
+                letters.insert(c);
+            });
+        } else if round == 1 {
+            letters = filter_set(line, letters);
+        } else {
+            score += get_score_equivalent(find_first(line, letters));
+            letters = HashSet::new();
         }
+        round = (round + 1) % 3;
     }
-    return Some(score);
-}
-
-fn get_score_equivalent_2(c: char) -> u32 {
-    let char_as_u32 = c as u32;
-    if char_as_u32 > 96 {
-        return char_as_u32 - 96;
-    }
-    return char_as_u32 - 38;
+    Some(score)
 }
 
 fn filter_set(line: String, letters: HashSet<char>) -> HashSet<char> {
@@ -105,7 +87,7 @@ fn filter_set(line: String, letters: HashSet<char>) -> HashSet<char> {
             new_letters.insert(c);
         };
     });
-    return new_letters;
+    new_letters
 }
 
 fn find_first(line: String, letters: HashSet<char>) -> char {
@@ -114,7 +96,7 @@ fn find_first(line: String, letters: HashSet<char>) -> char {
             return c;
         }
     }
-    return '0';
+    '0'
 }
 // UTILS
 fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>

@@ -26,63 +26,57 @@ mod tests {
     }
 }
 
-pub fn part_one(input: &str) -> Option<u32> {
+pub fn part_one(_input: &str) -> Option<u32> {
     let mut score: u32 = 0;
     if let Ok(lines) = read_lines("src/input") {
-        for res_line in lines {
-            if let Ok(line) = res_line {
-                score += compute_points(line.chars().nth(0).unwrap(), line.chars().nth(2).unwrap());
-            }
+        for line in lines.into_iter().flatten() {
+            score += compute_points(line.chars().next().unwrap(), line.chars().nth(2).unwrap());
         }
     }
-    return Some(score);
+    Some(score)
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(_input: &str) -> Option<u32> {
     let mut score: u32 = 0;
     if let Ok(lines) = read_lines("src/input") {
-        for res_line in lines {
-            if let Ok(line) = res_line {
-                score +=
-                    compute_points_2(line.chars().nth(0).unwrap(), line.chars().nth(2).unwrap());
-            }
+        for line in lines.into_iter().flatten() {
+            score += compute_points_2(line.chars().next().unwrap(), line.chars().nth(2).unwrap());
         }
     }
-    return Some(score);
+    Some(score)
 }
 
 // PART 1
-fn part1() {}
 
 fn compute_points(opponent: char, me: char) -> u32 {
     match opponent {
-        'A' => return handle_rock(me),
-        'B' => return handle_paper(me),
-        _ => return handle_scisor(me),
+        'A' => handle_rock(me),
+        'B' => handle_paper(me),
+        _ => handle_scisor(me),
     }
 }
 
 fn handle_rock(me: char) -> u32 {
     match me {
-        'X' => return 4,
-        'Y' => return 8,
-        _ => return 3,
+        'X' => 4,
+        'Y' => 8,
+        _ => 3,
     }
 }
 
 fn handle_paper(me: char) -> u32 {
     match me {
-        'X' => return 1,
-        'Y' => return 5,
-        _ => return 9,
+        'X' => 1,
+        'Y' => 5,
+        _ => 9,
     }
 }
 
 fn handle_scisor(me: char) -> u32 {
     match me {
-        'X' => return 7,
-        'Y' => return 2,
-        _ => return 6,
+        'X' => 7,
+        'Y' => 2,
+        _ => 6,
     }
 }
 
@@ -90,33 +84,33 @@ fn handle_scisor(me: char) -> u32 {
 
 fn compute_points_2(opponent: char, me: char) -> u32 {
     match opponent {
-        'A' => return handle_rock_2(me),
-        'B' => return handle_paper_2(me),
-        _ => return handle_scisor_2(me),
+        'A' => handle_rock_2(me),
+        'B' => handle_paper_2(me),
+        _ => handle_scisor_2(me),
     }
 }
 
 fn handle_rock_2(me: char) -> u32 {
     match me {
-        'X' => return 3,
-        'Y' => return 4,
-        _ => return 8,
+        'X' => 3,
+        'Y' => 4,
+        _ => 8,
     }
 }
 
 fn handle_paper_2(me: char) -> u32 {
     match me {
-        'X' => return 1,
-        'Y' => return 5,
-        _ => return 9,
+        'X' => 1,
+        'Y' => 5,
+        _ => 9,
     }
 }
 
 fn handle_scisor_2(me: char) -> u32 {
     match me {
-        'X' => return 2,
-        'Y' => return 6,
-        _ => return 7,
+        'X' => 2,
+        'Y' => 6,
+        _ => 7,
     }
 }
 

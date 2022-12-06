@@ -11,17 +11,22 @@ fn do_logic(input: &str, size: usize) -> Option<u32> {
     let mut idx: u32 = size as u32;
     input.as_bytes().windows(size).into_iter().any(|win| {
         idx += 1;
-        stack_valid(win, size)
+        stack_valid(win)
     });
     Some(idx - 1)
 }
 
-fn stack_valid(stack: &[u8], size: usize) -> bool {
+fn stack_valid(stack: &[u8]) -> bool {
     let mut set = HashSet::new();
+    let mut is_valid = true;
     stack.iter().for_each(|c| {
+        if set.contains(c) {
+            is_valid = false;
+            return;
+        }
         set.insert(c);
     });
-    set.len() == size
+    is_valid
 }
 
 fn main() {

@@ -1,6 +1,4 @@
 use std::collections::HashSet;
-use std::collections::VecDeque;
-
 pub fn part_one(input: &str) -> Option<u32> {
     do_logic(input, 4)
 }
@@ -10,24 +8,15 @@ pub fn part_two(input: &str) -> Option<u32> {
 }
 
 fn do_logic(input: &str, size: usize) -> Option<u32> {
-    let mut input_as_iter = input.chars();
-    let mut stack = VecDeque::new();
-    for _ in 1..(size + 1) {
-        stack.push_back(input_as_iter.next().unwrap());
-    }
-    let mut idx = size;
-    for c in input_as_iter {
-        if stack_valid(&stack, size) {
-            return Some(idx as u32);
-        }
+    let mut idx: u32 = size as u32;
+    input.as_bytes().windows(size).into_iter().any(|win| {
         idx += 1;
-        stack.pop_front();
-        stack.push_back(c);
-    }
-    None
+        stack_valid(&win, size)
+    });
+    Some(idx - 1)
 }
 
-fn stack_valid(stack: &VecDeque<char>, size: usize) -> bool {
+fn stack_valid(stack: &[u8], size: usize) -> bool {
     let mut set = HashSet::new();
     stack.into_iter().for_each(|c| {
         set.insert(c);

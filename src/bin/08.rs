@@ -40,8 +40,8 @@ fn is_visible_from_right(array: &[Vec<u8>], i: usize, j: usize) -> bool {
 
 fn is_visible_from_top(array: &[Vec<u8>], i: usize, j: usize) -> bool {
     let val = array[i][j];
-    for k in 0..i {
-        if val <= array[k][j] {
+    for tmp in array.iter().take(i) {
+        if val <= tmp[j] {
             return false;
         }
     }
@@ -125,8 +125,8 @@ fn view_top(array: &[Vec<u8>], i: usize, j: usize) -> u32 {
 fn view_bottom(array: &[Vec<u8>], i: usize, j: usize) -> u32 {
     let val = array[i][j];
     let mut view_distance = 1;
-    for k in i + 1..array.len() {
-        if val <= array[k][j] {
+    for tmp in array.iter().skip(i + 1) {
+        if val <= tmp[j] {
             return view_distance;
         }
         view_distance += 1;

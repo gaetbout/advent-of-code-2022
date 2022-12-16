@@ -10,3 +10,4 @@ publish = false
 [dependencies]
 pico-args = "0.5.0"
 regex = "1.7.0"
+range_union_find="0.4.3"

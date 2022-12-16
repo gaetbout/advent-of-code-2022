@@ -13,6 +13,7 @@ enum RockOrSand {
     Sand,
 }
 
+// No need of  the enum + could change to a Set
 trait Add {
     fn add_rock(&mut self, x: u32, y: u32);
     fn add_sand(&mut self, x: u32, y: u32);

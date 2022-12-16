@@ -91,7 +91,7 @@ fn is_valid(v1: Vec<NumberDepth>, v2: Vec<NumberDepth>) -> bool {
     false
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(_input: &str) -> Option<u32> {
     None
 }
 

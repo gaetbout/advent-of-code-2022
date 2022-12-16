@@ -82,7 +82,7 @@ fn create_monkey(chunks: &[&str]) -> Monkey {
     }
 }
 
-fn play_all_items(monkey_idx: usize, monkeys: &mut Vec<Monkey>) {
+fn play_all_items(monkey_idx: usize, monkeys: &mut [Monkey]) {
     let mut monkey = monkeys[monkey_idx].clone();
     monkey.items_inspected += monkey.items.len() as u128;
     for item in monkey.items.iter() {
@@ -125,7 +125,7 @@ pub fn part_two(input: &str) -> Option<u128> {
     Some(scores[scores.len() - 1] * scores[scores.len() - 2])
 }
 
-fn play_all_items_2(monkey_idx: usize, monkeys: &mut Vec<Monkey>, modulo: u128) {
+fn play_all_items_2(monkey_idx: usize, monkeys: &mut [Monkey], modulo: u128) {
     let mut monkey = monkeys[monkey_idx].clone();
     monkey.items_inspected += monkey.items.len() as u128;
     for item in monkey.items.iter() {

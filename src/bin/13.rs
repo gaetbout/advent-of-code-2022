@@ -9,6 +9,12 @@ enum NumOrVect {
     Number(u32),
 }
 
+enum LoopTrueFalse {
+    Loop,
+    True,
+    False,
+}
+
 pub fn part_one(input: &str) -> Option<u32> {
     let binding = input.split('\n').into_iter().collect::<Vec<_>>();
     let it = binding.chunks(3);
@@ -16,22 +22,16 @@ pub fn part_one(input: &str) -> Option<u32> {
     let mut idx = 1;
     // can prob do it using some one liner
     for lines in it {
-        if handle_lines(lines) {
+        let v1 = create_vector(lines[0]);
+        let v2 = create_vector(lines[1]);
+        if is_in_right_order(v1.to_vec(), v2.to_vec()) {
             score += idx;
         }
         idx += 1;
     }
     Some(score) // 6656
 }
-fn handle_lines(lines: &[&str]) -> bool {
-    let v1 = create_vector(lines[0]);
-    let v2 = create_vector(lines[1]);
-    println!("{:?}", v1);
-    println!("{:?}", v2);
-    println!();
-    // is_in_right_order(v1, v2)
-    is_in_right_order(&mut v1.iter(), &mut v2.iter())
-}
+
 fn create_vector(line: &str) -> Vec<NumOrVect> {
     let chars = Regex::new(r"\[|\]|\d+")
         .unwrap()
@@ -60,37 +60,52 @@ fn create_vector_loop(chars: &mut Iter<&str>, papa_vec: &mut Vec<NumOrVect>) -> 
     }
 }
 
-// fn is_in_right_order(v1: Vec<NumOrVect>, v2: Vec<NumOrVect>) -> bool {
-//   let mut ln1 = 0;
-//   let mut ln2 = 0;
-
-//   while ln1 < v1.len() && ln2 < v2.len() {
-//       return false;
-//   }
-//   ln1 == v1.len() - 1
-// }
-
-fn is_in_right_order(v1: &mut Iter<NumOrVect>, v2: &mut Iter<NumOrVect>) -> bool {
-    let a = match v1.next() {
-        Some(a) => a,
-        None => return true,
-    };
-    let b = match v2.next() {
-        Some(b) => b,
-        None => return false,
-    };
-    match a {
-        NumOrVect::Vect(v) => match b {
-            NumOrVect::Vect(v) => is_in_right_order(v1, v2),
-            NumOrVect::Number(n2) => false, // TODO
-        },
-        NumOrVect::Number(n1) => match b {
-            NumOrVect::Vect(v) => false, // TODO
-            NumOrVect::Number(n2) => match n1.cmp(n2) {
-                Ordering::Less => true,
-                Ordering::Equal => is_in_right_order(v1, v2),
-                Ordering::Greater => false,
+fn is_in_right_order(v1: Vec<NumOrVect>, v2: Vec<NumOrVect>) -> bool {
+    let mut idx1 = 0;
+    let mut idx2 = 0;
+    while idx1 < v1.len() && idx2 < v2.len() {
+        let a = &v1[idx1];
+        let b = &v2[idx2];
+        match a {
+            NumOrVect::Vect(local_v1) => return handle_vector(local_v1, b),
+            NumOrVect::Number(n1) => match handle_number(n1, b) {
+                LoopTrueFalse::Loop => {}
+                LoopTrueFalse::True => return true,
+                LoopTrueFalse::False => return false,
             },
+        };
+        idx1 += 1;
+        idx2 += 1;
+    }
+    idx1 == v1.len()
+}
+
+fn handle_vector(v1: &Vec<NumOrVect>, n2: &NumOrVect) -> bool {
+    if v1.is_empty() {
+        return true;
+    }
+    match n2 {
+        NumOrVect::Vect(local_v2) => is_in_right_order(v1.to_vec(), local_v2.to_vec()), // OK
+        NumOrVect::Number(n2) => is_in_right_order(v1.to_vec(), vec![NumOrVect::Number(*n2)]),
+    }
+}
+
+fn handle_number(n1: &u32, n2: &NumOrVect) -> LoopTrueFalse {
+    match n2 {
+        NumOrVect::Vect(local_v2) => {
+            if local_v2.is_empty() {
+                LoopTrueFalse::False
+            } else {
+                match is_in_right_order(vec![NumOrVect::Number(*n1)], local_v2.to_vec()) {
+                    true => LoopTrueFalse::True,
+                    false => LoopTrueFalse::False,
+                }
+            }
+        }
+        NumOrVect::Number(n3) => match n1.cmp(n3) {
+            Ordering::Less => LoopTrueFalse::True,
+            Ordering::Equal => LoopTrueFalse::Loop,
+            Ordering::Greater => LoopTrueFalse::False,
         },
     }
 }

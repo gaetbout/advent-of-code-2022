@@ -24,8 +24,9 @@ pub fn part_one(input: &str) -> Option<u32> {
     for lines in it {
         let v1 = create_vector(lines[0]);
         let v2 = create_vector(lines[1]);
-        if is_in_right_order(v1.to_vec(), v2.to_vec()) {
-            score += idx;
+        match is_in_right_order(v1.to_vec(), v2.to_vec()) {
+            LoopTrueFalse::Loop | LoopTrueFalse::True => score += idx,
+            LoopTrueFalse::False => (),
         }
         idx += 1;
     }
@@ -60,7 +61,7 @@ fn create_vector_loop(chars: &mut Iter<&str>, papa_vec: &mut Vec<NumOrVect>) -> 
     }
 }
 
-fn is_in_right_order(v1: Vec<NumOrVect>, v2: Vec<NumOrVect>) -> bool {
+fn is_in_right_order(v1: Vec<NumOrVect>, v2: Vec<NumOrVect>) -> LoopTrueFalse {
     let mut idx1 = 0;
     let mut idx2 = 0;
     while idx1 < v1.len() && idx2 < v2.len() {
@@ -70,22 +71,28 @@ fn is_in_right_order(v1: Vec<NumOrVect>, v2: Vec<NumOrVect>) -> bool {
             NumOrVect::Vect(local_v1) => return handle_vector(local_v1, b),
             NumOrVect::Number(n1) => match handle_number(n1, b) {
                 LoopTrueFalse::Loop => {}
-                LoopTrueFalse::True => return true,
-                LoopTrueFalse::False => return false,
+                LoopTrueFalse::True => return LoopTrueFalse::True,
+                LoopTrueFalse::False => return LoopTrueFalse::False,
             },
         };
         idx1 += 1;
         idx2 += 1;
     }
-    idx1 == v1.len()
+    if idx1 == v1.len() && idx2 == v2.len() {
+        LoopTrueFalse::Loop
+    } else if idx1 == v1.len() {
+        LoopTrueFalse::True
+    } else {
+        LoopTrueFalse::False
+    }
 }
 
-fn handle_vector(v1: &Vec<NumOrVect>, n2: &NumOrVect) -> bool {
+fn handle_vector(v1: &Vec<NumOrVect>, n2: &NumOrVect) -> LoopTrueFalse {
     if v1.is_empty() {
-        return true;
+        return LoopTrueFalse::True;
     }
     match n2 {
-        NumOrVect::Vect(local_v2) => is_in_right_order(v1.to_vec(), local_v2.to_vec()), // OK
+        NumOrVect::Vect(local_v2) => is_in_right_order(v1.to_vec(), local_v2.to_vec()),
         NumOrVect::Number(n2) => is_in_right_order(v1.to_vec(), vec![NumOrVect::Number(*n2)]),
     }
 }
@@ -96,10 +103,7 @@ fn handle_number(n1: &u32, n2: &NumOrVect) -> LoopTrueFalse {
             if local_v2.is_empty() {
                 LoopTrueFalse::False
             } else {
-                match is_in_right_order(vec![NumOrVect::Number(*n1)], local_v2.to_vec()) {
-                    true => LoopTrueFalse::True,
-                    false => LoopTrueFalse::False,
-                }
+                is_in_right_order(vec![NumOrVect::Number(*n1)], local_v2.to_vec())
             }
         }
         NumOrVect::Number(n3) => match n1.cmp(n3) {

@@ -3,7 +3,7 @@ use std::slice::Iter;
 
 use regex::Regex;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 enum NumOrVect {
     Vect(Vec<NumOrVect>),
     Number(u32),
@@ -115,9 +115,34 @@ fn handle_number(n1: &u32, n2: &NumOrVect) -> LoopTrueFalse {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    None
+    let binding = input.split('\n').into_iter().collect::<Vec<_>>();
+    let it = binding.chunks(3);
+    let mut vectors = vec![];
+    for lines in it {
+        vectors.push(create_vector(lines[0]));
+        vectors.push(create_vector(lines[1]));
+    }
+    let vec_2 = NumOrVect::Vect(vec![NumOrVect::Vect(vec![NumOrVect::Number(2)])]);
+    let vec_6 = NumOrVect::Vect(vec![NumOrVect::Vect(vec![NumOrVect::Number(6)])]);
+    vectors.push(vec![vec_2.clone()]);
+    vectors.push(vec![vec_6.clone()]);
+
+    vectors.sort_by(|v1, v2| compare_vecs(v1, v2));
+    // for v in vectors.iter().skip(1) {
+    //     println!("v{:?}", v);
+    // }
+    let p1 = vectors.iter().position(|v| v[0] == vec_2).unwrap() + 1;
+    let p2 = vectors.iter().position(|v| v[0] == vec_6).unwrap() + 1;
+    Some((p1 * p2) as u32) // 19716
 }
 
+fn compare_vecs(v1: &[NumOrVect], v2: &[NumOrVect]) -> Ordering {
+    match is_in_right_order(v1.to_vec(), v2.to_vec()) {
+        LoopTrueFalse::Loop => Ordering::Less,
+        LoopTrueFalse::True => Ordering::Less,
+        LoopTrueFalse::False => Ordering::Greater,
+    }
+}
 fn main() {
     let input = &advent_of_code::read_file("inputs", 13);
     advent_of_code::solve!(1, part_one, input);

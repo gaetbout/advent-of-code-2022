@@ -1,97 +1,101 @@
 use std::cmp::Ordering;
-use std::str::Chars;
+use std::slice::Iter;
+
+use regex::Regex;
+
+#[derive(Debug, Clone)]
+enum NumOrVect {
+    Vect(Vec<NumOrVect>),
+    Number(u32),
+}
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let mut it = input.split('\n');
+    let binding = input.split('\n').into_iter().collect::<Vec<_>>();
+    let it = binding.chunks(3);
+    let mut score = 0;
     let mut idx = 1;
-    let mut score = 0u32;
-    while let Some(first_line) = it.next() {
-        let sec_line = it.next().unwrap();
-
-        let first_vec = create_number_depth_array(&mut first_line.chars());
-        let sec_vec = create_number_depth_array(&mut sec_line.chars());
-
-        it.next();
-        // println!("{:?}", first_vec);
-        // println!("{:?}", sec_vec);
-        if is_valid(first_vec, sec_vec) {
+    // can prob do it using some one liner
+    for lines in it {
+        if handle_lines(lines) {
             score += idx;
         }
-        // println!();
         idx += 1;
     }
-    Some(score)
-    // 6656
+    Some(score) // 6656
 }
-#[derive(Debug)]
-struct NumberDepth {
-    c: char,
-    depth: u32,
+fn handle_lines(lines: &[&str]) -> bool {
+    let v1 = create_vector(lines[0]);
+    let v2 = create_vector(lines[1]);
+    println!("{:?}", v1);
+    println!("{:?}", v2);
+    println!();
+    // is_in_right_order(v1, v2)
+    is_in_right_order(&mut v1.iter(), &mut v2.iter())
 }
-
-fn create_number_depth_array(line: &mut Chars<'_>) -> Vec<NumberDepth> {
-    let mut vec = vec![];
-    let mut current_depth = 1;
-    for c in line {
-        match c {
-            '[' => current_depth += 1,
-            ']' => {
-                vec.push(NumberDepth {
-                    c,
-                    depth: current_depth,
-                });
-                current_depth -= 1
-            }
-            ',' => {}
-            _ => vec.push(NumberDepth {
-                c,
-                depth: current_depth,
-            }),
+fn create_vector(line: &str) -> Vec<NumOrVect> {
+    let chars = Regex::new(r"\[|\]|\d+")
+        .unwrap()
+        .find_iter(line)
+        .map(|n| n.as_str())
+        .collect::<Vec<&str>>();
+    create_vector_loop(&mut chars.iter(), &mut vec![])
+}
+fn create_vector_loop(chars: &mut Iter<&str>, papa_vec: &mut Vec<NumOrVect>) -> Vec<NumOrVect> {
+    let each = match chars.next() {
+        Some(e) => e,
+        None => return papa_vec.to_vec(),
+    };
+    match *each {
+        "[" => {
+            let v = create_vector_loop(chars, &mut vec![]);
+            papa_vec.push(NumOrVect::Vect(v));
+            create_vector_loop(chars, papa_vec)
+        }
+        "]" => papa_vec.to_vec(),
+        _ => {
+            let n = each.parse::<u32>().unwrap();
+            papa_vec.push(NumOrVect::Number(n));
+            create_vector_loop(chars, papa_vec)
         }
     }
-    vec
 }
 
-fn is_valid(v1: Vec<NumberDepth>, v2: Vec<NumberDepth>) -> bool {
-    for (i, n1) in v1.iter().enumerate() {
-        if v2.len() == i {
-            return false;
-        }
-        let n2 = &v2[i];
+// fn is_in_right_order(v1: Vec<NumOrVect>, v2: Vec<NumOrVect>) -> bool {
+//   let mut ln1 = 0;
+//   let mut ln2 = 0;
 
-        if n2.c.eq(&']') && n1.c.is_alphanumeric() {
-            return false;
-        }
-        if n1.c.eq(&']') {
-            match n1.depth.cmp(&n2.depth) {
-                Ordering::Less => return true,
-                Ordering::Equal => return true,
-                Ordering::Greater => return false,
-            }
-        }
-        match n1.depth.cmp(&n2.depth) {
-            Ordering::Less => match n1.c.cmp(&n2.c) {
-                Ordering::Less => return true,
-                Ordering::Equal => return false,
-                Ordering::Greater => return false,
+//   while ln1 < v1.len() && ln2 < v2.len() {
+//       return false;
+//   }
+//   ln1 == v1.len() - 1
+// }
+
+fn is_in_right_order(v1: &mut Iter<NumOrVect>, v2: &mut Iter<NumOrVect>) -> bool {
+    let a = match v1.next() {
+        Some(a) => a,
+        None => return true,
+    };
+    let b = match v2.next() {
+        Some(b) => b,
+        None => return false,
+    };
+    match a {
+        NumOrVect::Vect(v) => match b {
+            NumOrVect::Vect(v) => is_in_right_order(v1, v2),
+            NumOrVect::Number(n2) => false, // TODO
+        },
+        NumOrVect::Number(n1) => match b {
+            NumOrVect::Vect(v) => false, // TODO
+            NumOrVect::Number(n2) => match n1.cmp(n2) {
+                Ordering::Less => true,
+                Ordering::Equal => is_in_right_order(v1, v2),
+                Ordering::Greater => false,
             },
-            Ordering::Greater => match n1.c.cmp(&n2.c) {
-                Ordering::Less => return true,
-                Ordering::Equal => continue,
-                Ordering::Greater => return false,
-            },
-            Ordering::Equal => match n1.c.cmp(&n2.c) {
-                // OK
-                Ordering::Less => return true,
-                Ordering::Equal => continue,
-                Ordering::Greater => return false,
-            },
-        }
+        },
     }
-    false
 }
 
-pub fn part_two(_input: &str) -> Option<u32> {
+pub fn part_two(input: &str) -> Option<u32> {
     None
 }
 
@@ -114,6 +118,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let input = advent_of_code::read_file("examples", 13);
-        assert_eq!(part_two(&input), None);
+        assert_eq!(part_two(&input), Some(140));
     }
 }

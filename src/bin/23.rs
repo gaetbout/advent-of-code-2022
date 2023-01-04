@@ -18,14 +18,10 @@ impl Position {
 pub fn part_one(input: &str) -> Option<u32> {
     let mut elves = generate_set_of_elves(input);
 
-    print_elves(&elves);
-
-    for round in 0..3 {
+    for round in 0..10 {
         let moving_elves = generate_set_of_elves_that_will_move(&elves);
         let mut elves_not_moving: HashSet<Position> =
             HashSet::from_iter(elves.iter().copied().filter(|e| !moving_elves.contains(e)));
-        // println!("elves_not_moving: {}", elves_not_moving.len());
-        // print_elves(&elves_not_moving);
         let move_considration = consider_moving(&moving_elves, round);
 
         for (pos, set) in move_considration {
@@ -38,7 +34,6 @@ pub fn part_one(input: &str) -> Option<u32> {
             }
         }
         elves = elves_not_moving;
-        print_elves(&elves);
     }
     Some(compute_size(&elves))
 }
@@ -72,12 +67,8 @@ fn can_move_anywhere(elf: &Position, elves: &HashSet<Position>) -> bool {
         && can_move_west(elf, elves).is_some())
 }
 fn consider_moving(elves: &HashSet<Position>, round: u32) -> HashMap<Position, HashSet<Position>> {
-    println!("Round: {}", round % 4);
-
     let mut position_elves: HashMap<Position, HashSet<Position>> = HashMap::new();
     for elf in elves {
-        // println!("ELF: {:?}", elf);
-        // print_elves(elves);
         match round % 4 {
             0 => check_move(
                 elf,
@@ -117,7 +108,6 @@ fn consider_moving(elves: &HashSet<Position>, round: u32) -> HashMap<Position, H
             ),
             _ => panic!("Is this even possible"),
         }
-        // println!();
     }
     position_elves
 }
@@ -221,9 +211,31 @@ fn compute_size(elves: &HashSet<Position>) -> u32 {
         min_col = cmp::min(e.col, min_col);
         max_col = cmp::max(e.col, max_col);
     }
-    ((max_row - min_row) * (max_col - min_col)) as u32 - elves.len() as u32
+    (((max_row - min_row) + 1) * ((max_col - min_col) + 1)) as u32 - elves.len() as u32
 }
-pub fn part_two(input: &str) -> Option<i32> {
+pub fn part_two(input: &str) -> Option<u32> {
+    let mut elves = generate_set_of_elves(input);
+    let tot_elves = elves.len();
+    for round in 0..1000000 {
+        let moving_elves = generate_set_of_elves_that_will_move(&elves);
+        let mut elves_not_moving: HashSet<Position> =
+            HashSet::from_iter(elves.iter().copied().filter(|e| !moving_elves.contains(e)));
+        if elves_not_moving.len() == tot_elves {
+            return Some(round + 1);
+        }
+        let move_considration = consider_moving(&moving_elves, round);
+
+        for (pos, set) in move_considration {
+            if set.len() > 1 {
+                for e in set {
+                    elves_not_moving.insert(e);
+                }
+            } else {
+                elves_not_moving.insert(pos);
+            }
+        }
+        elves = elves_not_moving;
+    }
     None
 }
 
@@ -246,17 +258,6 @@ mod tests {
     #[test]
     fn test_part_two() {
         let input = advent_of_code::read_file("examples", 23);
-        assert_eq!(part_two(&input), None);
+        assert_eq!(part_two(&input), Some(20));
     }
-}
-
-// DEBUG
-fn print_elves(elves: &HashSet<Position>) {
-    let mut positions: Vec<&Position> = elves.iter().collect();
-    positions.sort_by(|a, b| a.row.cmp(&b.row));
-
-    for position in positions {
-        println!("{}\t{}", position.row, position.col);
-    }
-    println!();
 }
